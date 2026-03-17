@@ -1,0 +1,368 @@
+{
+    "budgets": {
+        "columns": [
+            {
+                "column_name": "budget_id",
+                "data_type": "integer",
+                "is_indexed": true
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "limit_amount",
+                "data_type": "numeric",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "budget_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "budget_id": 1,
+                "user_id": 1,
+                "category": "Entertainment",
+                "limit_amount": 50.0
+            },
+            {
+                "budget_id": 2,
+                "user_id": 1,
+                "category": "Music",
+                "limit_amount": 30.0
+            }
+        ]
+    },
+    "reminders": {
+        "columns": [
+            {
+                "column_name": "r_id",
+                "data_type": "integer",
+                "is_indexed": true
+            },
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "reminder_sent_at",
+                "data_type": "timestamp without time zone",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "r_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "sub_id",
+                "references_table": "subscriptions_old",
+                "references_column": "sub_id"
+            },
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "r_id": 1,
+                "sub_id": 1,
+                "user_id": 1,
+                "reminder_sent_at": "2026-01-15T10:00:00"
+            },
+            {
+                "r_id": 2,
+                "sub_id": 2,
+                "user_id": 1,
+                "reminder_sent_at": "2026-01-16T12:00:00"
+            }
+        ]
+    },
+    "subscriptions": {
+        "columns": [
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "sub_name",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "cost",
+                "data_type": "numeric",
+                "is_indexed": false
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "billing_cycle",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "payment_method",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "is_active",
+                "data_type": "boolean",
+                "is_indexed": false
+            },
+            {
+                "column_name": "usage_score",
+                "data_type": "integer",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "sub_id",
+            "billing_cycle",
+            "is_active"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "sub_id": 1,
+                "user_id": 1,
+                "sub_name": "Netflix",
+                "cost": 500.0,
+                "category": "Entertainment",
+                "billing_cycle": "Monthly",
+                "payment_method": "Credit Card",
+                "is_active": true,
+                "usage_score": 80
+            },
+            {
+                "sub_id": 2,
+                "user_id": 1,
+                "sub_name": "Spotify",
+                "cost": 120.0,
+                "category": "Music",
+                "billing_cycle": "Monthly",
+                "payment_method": "Debit Card",
+                "is_active": true,
+                "usage_score": 70
+            }
+        ]
+    },
+    "subscriptions_old": {
+        "columns": [
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": true
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "sub_name",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "cost",
+                "data_type": "numeric",
+                "is_indexed": false
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "billing_cycle",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "payment_method",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "is_active",
+                "data_type": "boolean",
+                "is_indexed": false
+            },
+            {
+                "column_name": "usage_score",
+                "data_type": "integer",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "sub_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "sub_id": 1,
+                "user_id": 1,
+                "sub_name": "Netflix",
+                "cost": 500.0,
+                "category": "Entertainment",
+                "billing_cycle": "Monthly",
+                "payment_method": "Credit Card",
+                "is_active": true,
+                "usage_score": 80
+            },
+            {
+                "sub_id": 2,
+                "user_id": 1,
+                "sub_name": "Spotify",
+                "cost": 120.0,
+                "category": "Music",
+                "billing_cycle": "Monthly",
+                "payment_method": "Debit Card",
+                "is_active": true,
+                "usage_score": 70
+            }
+        ]
+    },
+    "usage_logs": {
+        "columns": [
+            {
+                "column_name": "usage_id",
+                "data_type": "integer",
+                "is_indexed": true
+            },
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false
+            },
+            {
+                "column_name": "used",
+                "data_type": "numeric",
+                "is_indexed": false
+            },
+            {
+                "column_name": "week_start_date",
+                "data_type": "date",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "usage_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "sub_id",
+                "references_table": "subscriptions_old",
+                "references_column": "sub_id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "usage_id": 1,
+                "sub_id": 1,
+                "used": 10.0,
+                "week_start_date": "2026-01-01"
+            },
+            {
+                "usage_id": 2,
+                "sub_id": 2,
+                "used": 5.0,
+                "week_start_date": "2026-01-01"
+            }
+        ]
+    },
+    "users": {
+        "columns": [
+            {
+                "column_name": "id",
+                "data_type": "integer",
+                "is_indexed": true
+            },
+            {
+                "column_name": "name",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "email",
+                "data_type": "character varying",
+                "is_indexed": true
+            },
+            {
+                "column_name": "password",
+                "data_type": "character varying",
+                "is_indexed": false
+            },
+            {
+                "column_name": "age",
+                "data_type": "integer",
+                "is_indexed": false
+            }
+        ],
+        "primary_keys": [
+            "id"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "id": 2,
+                "name": "Ayush",
+                "email": "ayushmayekar@gmail.com",
+                "password": "Ayush@12",
+                "age": 21
+            },
+            {
+                "id": 3,
+                "name": "Chetan",
+                "email": "chetankatkar@gmail.com",
+                "password": "Chetan@03",
+                "age": 20
+            }
+        ]
+    }
+}

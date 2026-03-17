@@ -1,0 +1,409 @@
+{
+    "budgets": {
+        "table_description": "Stores user-defined spending limits categorized by specific types of expenses.",
+        "columns": [
+            {
+                "column_name": "budget_id",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "Unique identifier for each budget record."
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "Identifier of the user associated with this budget."
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The expense category or label for which the budget is set."
+            },
+            {
+                "column_name": "limit_amount",
+                "data_type": "numeric",
+                "is_indexed": false,
+                "description": "The maximum monetary amount allocated to this budget category."
+            }
+        ],
+        "primary_keys": [
+            "budget_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "budget_id": 1,
+                "user_id": 1,
+                "category": "Entertainment",
+                "limit_amount": 50.0
+            },
+            {
+                "budget_id": 2,
+                "user_id": 1,
+                "category": "Music",
+                "limit_amount": 30.0
+            }
+        ]
+    },
+    "reminders": {
+        "table_description": "Stores a historical record of notifications or reminders sent to users regarding their subscriptions.",
+        "columns": [
+            {
+                "column_name": "r_id",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "The unique primary identifier for each reminder record."
+            },
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "Reference to the subscription record associated with this reminder notification."
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "Reference to the unique identifier of the user who received the reminder."
+            },
+            {
+                "column_name": "reminder_sent_at",
+                "data_type": "timestamp without time zone",
+                "is_indexed": false,
+                "description": "The date and time at which the reminder was dispatched to the user."
+            }
+        ],
+        "primary_keys": [
+            "r_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "sub_id",
+                "references_table": "subscriptions_old",
+                "references_column": "sub_id"
+            },
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "r_id": 1,
+                "sub_id": 1,
+                "user_id": 1,
+                "reminder_sent_at": "2026-01-15T10:00:00"
+            },
+            {
+                "r_id": 2,
+                "sub_id": 2,
+                "user_id": 1,
+                "reminder_sent_at": "2026-01-16T12:00:00"
+            }
+        ]
+    },
+    "subscriptions": {
+        "table_description": "Stores detailed records of user-specific subscriptions, including service names, billing terms, costs, and current activity status.",
+        "columns": [
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The unique primary identifier for each subscription record."
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The foreign key linking the subscription to a specific user account."
+            },
+            {
+                "column_name": "sub_name",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The name of the service provider or platform being subscribed to."
+            },
+            {
+                "column_name": "cost",
+                "data_type": "numeric",
+                "is_indexed": false,
+                "description": "The monetary amount charged for the subscription service per billing cycle."
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The industry or type classification of the service, such as Music or Entertainment."
+            },
+            {
+                "column_name": "billing_cycle",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The recurring frequency of payment for the subscription service."
+            },
+            {
+                "column_name": "payment_method",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The financial instrument used to pay for the subscription."
+            },
+            {
+                "column_name": "is_active",
+                "data_type": "boolean",
+                "is_indexed": false,
+                "description": "A flag indicating whether the subscription is currently active or deactivated."
+            },
+            {
+                "column_name": "usage_score",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "A metric representing the user's level of engagement or activity with the service."
+            }
+        ],
+        "primary_keys": [
+            "sub_id",
+            "billing_cycle",
+            "is_active"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "sub_id": 1,
+                "user_id": 1,
+                "sub_name": "Netflix",
+                "cost": 500.0,
+                "category": "Entertainment",
+                "billing_cycle": "Monthly",
+                "payment_method": "Credit Card",
+                "is_active": true,
+                "usage_score": 80
+            },
+            {
+                "sub_id": 2,
+                "user_id": 1,
+                "sub_name": "Spotify",
+                "cost": 120.0,
+                "category": "Music",
+                "billing_cycle": "Monthly",
+                "payment_method": "Debit Card",
+                "is_active": true,
+                "usage_score": 70
+            }
+        ]
+    },
+    "subscriptions_old": {
+        "table_description": "This table stores legacy records of user subscriptions, detailing service names, financial costs, and usage metrics.",
+        "columns": [
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "Unique identifier for each subscription record."
+            },
+            {
+                "column_name": "user_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The unique identifier of the user associated with the subscription."
+            },
+            {
+                "column_name": "sub_name",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The name of the service or subscription provider."
+            },
+            {
+                "column_name": "cost",
+                "data_type": "numeric",
+                "is_indexed": false,
+                "description": "The recurring cost of the subscription."
+            },
+            {
+                "column_name": "category",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The classification of the subscription service, such as entertainment or music."
+            },
+            {
+                "column_name": "billing_cycle",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The frequency at which the subscription is billed, such as monthly or annually."
+            },
+            {
+                "column_name": "payment_method",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The primary method used for paying the subscription fees."
+            },
+            {
+                "column_name": "is_active",
+                "data_type": "boolean",
+                "is_indexed": false,
+                "description": "A flag indicating whether the subscription is currently in use."
+            },
+            {
+                "column_name": "usage_score",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "A calculated metric representing the user's engagement level with the service."
+            }
+        ],
+        "primary_keys": [
+            "sub_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "user_id",
+                "references_table": "users",
+                "references_column": "id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "sub_id": 1,
+                "user_id": 1,
+                "sub_name": "Netflix",
+                "cost": 500.0,
+                "category": "Entertainment",
+                "billing_cycle": "Monthly",
+                "payment_method": "Credit Card",
+                "is_active": true,
+                "usage_score": 80
+            },
+            {
+                "sub_id": 2,
+                "user_id": 1,
+                "sub_name": "Spotify",
+                "cost": 120.0,
+                "category": "Music",
+                "billing_cycle": "Monthly",
+                "payment_method": "Debit Card",
+                "is_active": true,
+                "usage_score": 70
+            }
+        ]
+    },
+    "usage_logs": {
+        "table_description": "Stores historical weekly resource consumption records associated with specific subscriptions.",
+        "columns": [
+            {
+                "column_name": "usage_id",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "Unique identifier for each usage log entry."
+            },
+            {
+                "column_name": "sub_id",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "Reference to the subscription associated with the recorded usage."
+            },
+            {
+                "column_name": "used",
+                "data_type": "numeric",
+                "is_indexed": false,
+                "description": "The numerical amount of service or resource consumed."
+            },
+            {
+                "column_name": "week_start_date",
+                "data_type": "date",
+                "is_indexed": false,
+                "description": "The beginning date of the week for which the usage is logged."
+            }
+        ],
+        "primary_keys": [
+            "usage_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "sub_id",
+                "references_table": "subscriptions_old",
+                "references_column": "sub_id"
+            }
+        ],
+        "sample_rows": [
+            {
+                "usage_id": 1,
+                "sub_id": 1,
+                "used": 10.0,
+                "week_start_date": "2026-01-01"
+            },
+            {
+                "usage_id": 2,
+                "sub_id": 2,
+                "used": 5.0,
+                "week_start_date": "2026-01-01"
+            }
+        ]
+    },
+    "users": {
+        "table_description": "This table stores individual user account details including credentials and demographic information.",
+        "columns": [
+            {
+                "column_name": "id",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "A unique numerical identifier for each user record."
+            },
+            {
+                "column_name": "name",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The full name or display name of the user."
+            },
+            {
+                "column_name": "email",
+                "data_type": "character varying",
+                "is_indexed": true,
+                "description": "The primary email address associated with the user account."
+            },
+            {
+                "column_name": "password",
+                "data_type": "character varying",
+                "is_indexed": false,
+                "description": "The sensitive authentication credential for account access."
+            },
+            {
+                "column_name": "age",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The chronological age of the user in years."
+            }
+        ],
+        "primary_keys": [
+            "id"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "id": 2,
+                "name": "Ayush",
+                "email": "ayushmayekar@gmail.com",
+                "password": "Ayush@12",
+                "age": 21
+            },
+            {
+                "id": 3,
+                "name": "Chetan",
+                "email": "chetankatkar@gmail.com",
+                "password": "Chetan@03",
+                "age": 20
+            }
+        ]
+    }
+}
