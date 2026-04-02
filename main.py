@@ -1,12 +1,10 @@
 from sql import NL2SQL
 from sql import SchemaRetriever
+from classifier import run_pipeline
 
 engine = NL2SQL()
 
 query = "What is the password that user rajit uses?"
-
-
-
 
 relevant_tables_json = {
     "faculty": {
@@ -75,9 +73,16 @@ relevant_tables_json = {
 }
 
 retriever = SchemaRetriever()
-schema = retriever.retrieve(query, top_k=5)
+# schema = retriever.retrieve(query, top_k=5)
 
 
+while True:
+    query = input("\nEnter your query (type 'exit' to stop): ")
+    if query.lower() == "exit":
+        print("Stopped.")
+        break
+    resolved = run_pipeline(query)
+    schema = retriever.retrieve(query, top_k=5)
+    sql = engine.generate(query, schema)
+    print(sql)
 
-sql = engine.generate(query, schema)
-print(sql)
