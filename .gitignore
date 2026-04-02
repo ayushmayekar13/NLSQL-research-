@@ -1,3 +1,4 @@
 serialized_schema.txt
 .env
 __pycache__/classifier.cpython-310.pyc
+.DS_Store
