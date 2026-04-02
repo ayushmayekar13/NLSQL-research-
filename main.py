@@ -1,6 +1,7 @@
 from sql import NL2SQL
 from sql import SchemaRetriever
 from classifier import run_pipeline
+from rich import print_json
 
 engine = NL2SQL()
 
@@ -82,7 +83,11 @@ while True:
         print("Stopped.")
         break
     resolved = run_pipeline(query)
-    schema = retriever.retrieve(query, top_k=5)
-    sql = engine.generate(query, schema)
+    # This is for extracting only one table
+    schema = retriever.retrieve(resolved, top_k=5)
+
+    print_json(data=schema)
+    sql = engine.generate(resolved, schema)
+    print("[SQL]")
     print(sql)
 

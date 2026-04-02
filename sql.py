@@ -9,7 +9,7 @@ import re
 import json
 import sqlglot
 from typing import Dict, Any, Set
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from google import genai
 
 import json
 from typing import Any, Dict, Optional
@@ -19,19 +19,17 @@ from sentence_transformers import SentenceTransformer
 
 
 class NL2SQL:
-    def __init__(self, model_name="Qwen/Qwen2.5-Coder-1.5B-Instruct"):
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+    def __init__(self, model_name: str = "gemini-2.5-flash"):
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise ValueError("GEMINI_API_KEY environment variable is not set.")
 
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
-
-        self.generator = pipeline(
-            "text-generation",
-            model=self.model,
-            tokenizer=self.tokenizer
-        )
+        self.client = genai.Client(api_key=api_key)
+        self.model_name = model_name
 
     def _schema_to_text(self, schema: Dict[str, Any]) -> str:
         parts = []
+
         for table, info in schema.items():
             parts.append(f"Table: {table}")
 
@@ -67,16 +65,22 @@ class NL2SQL:
 
     def _build_prompt(self, query: str, schema: Dict[str, Any]) -> str:
         schema_text = self._schema_to_text(schema)
+
         return f"""
 You are a Text-to-SQL system.
 
-Convert the natural language query into SQL.
+Convert the natural language query into a valid PostgreSQL SQL query.
 
 Constraints:
 - Use ONLY tables and columns from the schema
-- Do NOT invent names
+- Do NOT invent table names or column names
 - Use joins only if needed
 - Return ONLY SQL
+- Prefer exact matching using sample values when appropriate
+- If a person's full name appears and the schema has separate first_name and last_name columns, split it correctly
+- Do not include markdown fences
+- If the provided schema does not satisfy the requested query return NULL
+- End the SQL with a semicolon
 
 Schema:
 {schema_text}
@@ -89,20 +93,24 @@ SQL:
 
     def _extract_sql(self, text: str) -> str:
         text = re.sub(r"```sql", "", text, flags=re.IGNORECASE)
-        text = re.sub(r"```", "", text)
+        text = re.sub(r"```", "", text).strip()
 
-        match = re.search(r"(SELECT\b.*?;)", text, re.I | re.S)
+        match = re.search(r"(SELECT\b.*?;)", text, re.IGNORECASE | re.DOTALL)
         if match:
             return match.group(1).strip()
 
-        match = re.search(r"(SELECT\b.*)", text, re.I | re.S)
+        match = re.search(r"(WITH\b.*?;)", text, re.IGNORECASE | re.DOTALL)
+        if match:
+            return match.group(1).strip()
+
+        match = re.search(r"((SELECT|WITH)\b.*)", text, re.IGNORECASE | re.DOTALL)
         if match:
             sql = match.group(1).strip()
             if not sql.endswith(";"):
                 sql += ";"
             return sql
 
-        return text.strip()
+        return text
 
     def _allowed_schema(self, schema: Dict[str, Any]) -> Dict[str, Set[str]]:
         return {
@@ -115,14 +123,14 @@ SQL:
 
     def _validate(self, sql: str, schema: Dict[str, Any]) -> bool:
         try:
-            parsed = sqlglot.parse_one(sql)
+            parsed = sqlglot.parse_one(sql, read="postgres")
         except Exception:
             return False
 
         allowed = self._allowed_schema(schema)
 
         for table in parsed.find_all(sqlglot.exp.Table):
-            if table.name.lower() not in allowed:
+            if table.name and table.name.lower() not in allowed:
                 return False
 
         for col in parsed.find_all(sqlglot.exp.Column):
@@ -140,22 +148,23 @@ SQL:
 
         return True
 
+    def _call_gemini(self, prompt: str) -> str:
+        response = self.client.models.generate_content(
+            model=self.model_name,
+            contents=prompt,
+        )
+        return (response.text or "").strip()
+
     def generate(self, query: str, schema: Dict[str, Any], retries: int = 2) -> str:
         prompt = self._build_prompt(query, schema)
         last_sql = "-- Failed to generate valid SQL"
 
         for _ in range(retries):
-            output = self.generator(
-                prompt,
-                max_new_tokens=200,
-                temperature=0.1,
-                do_sample=True
-            )[0]["generated_text"]
-
-            sql = self._extract_sql(output)
+            output_text = self._call_gemini(prompt)
+            sql = self._extract_sql(output_text)
             last_sql = sql
 
-            if self._validate(sql, schema):
+            if sql.strip().lower().startswith("select") and self._validate(sql, schema):
                 return sql
 
         return last_sql
@@ -193,7 +202,7 @@ class SchemaRetriever:
     def search_schema(self, query_text: str, top_k: int = 5, collection_name: Optional[str] = None):
         collection = collection_name or self.collection_name
         query_vector = self.model.encode(query_text).tolist()
-        print("Similarity search performed")
+        print("[SchemaRetriever] Similarity search performed")
 
         # Your notebook uses query_points() (server-side API wrapper)
         return self.db.query_points(
@@ -219,7 +228,7 @@ class SchemaRetriever:
 
         obj = {}
         obj[table_name] = context_data.get(table_name)
-        print("Collected top context obj")
+        print("[SchemaRetriever] Collected top context object:")
         # if isinstance(obj, dict):
         #     obj = dict(obj)  # avoid mutating file-backed object
         #     obj["table_name"] = table_name
