@@ -599,16 +599,7 @@
         <div class="side-label">Query history</div>
         <div class="hist-list" id="hist-list">
           <div class="hist-li active" onclick="loadHistory(this,0)">
-            <span class="htag srd">SRD</span>Total revenue for last month
-          </div>
-          <div class="hist-li" onclick="loadHistory(this,1)">
-            <span class="htag mrd">MRD</span>Break that down by region
-          </div>
-          <div class="hist-li" onclick="loadHistory(this,2)">
-            <span class="htag srd">SRD</span>Top 5 products by sales
-          </div>
-          <div class="hist-li" onclick="loadHistory(this,3)">
-            <span class="htag srd">SRD</span>Customers who ordered more than twice
+            <span class="htag srd">SRD</span>Welcome to QueryNL2SQL!
           </div>
         </div>
       </div>
@@ -668,6 +659,7 @@
           <div class="fade-in-3">
             <div class="sec-label-sm">Generated SQL</div>
             <div class="sql-wrap">
+              <button class="copy-btn" style="right: 70px;" onclick="executeSQL()">Execute</button>
               <button class="copy-btn" onclick="copySQL()">copy</button>
               <div class="sql-box">
                 <pre id="sql-display"><span class="kw">SELECT</span>
@@ -727,7 +719,7 @@
             <div class="schema-title">Schema explorer</div>
             <div class="schema-meta" id="schema-meta">ecommerce_db · PostgreSQL · 12 tables</div>
           </div>
-          <div class="schema-grid">
+          <div class="schema-grid" id="schema-grid">
 
             <div class="schema-card">
               <div class="schema-card-head">
@@ -823,6 +815,88 @@
 </div><!-- /s-app -->
 
 <script>
+/* ── API CONFIG ── */
+const API_BASE = 'http://localhost:8000/api';
+let sessionId = null;
+
+function escHtml(s) {
+  return String(s)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function renderSQL(sql) {
+  if (!sql) return '<span class="cmt">-- No SQL generated</span>';
+  let x = escHtml(sql);
+  const kw = [
+    'SELECT','FROM','WHERE','JOIN','LEFT','RIGHT','INNER','OUTER','ON',
+    'GROUP BY','ORDER BY','LIMIT','HAVING','WITH','AS','AND','OR','DISTINCT'
+  ];
+  kw.forEach(k => {
+    const re = new RegExp('\\b' + k.replace(' ', '\\s+') + '\\b', 'gi');
+    x = x.replace(re, (m) => '<span class="kw">' + m.toUpperCase() + '</span>');
+  });
+  return x;
+}
+
+async function apiPost(path, body) {
+  const res = await fetch(API_BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {})
+  });
+  const txt = await res.text();
+  let json = null;
+  try { json = txt ? JSON.parse(txt) : null; } catch (_) {}
+  if (!res.ok) {
+    const msg = (json && (json.message || json.detail || json.error)) ? JSON.stringify(json) : (txt || ('HTTP ' + res.status));
+    throw new Error(msg);
+  }
+  return json;
+}
+
+async function apiGet(path) {
+  const res = await fetch(API_BASE + path, { method: 'GET' });
+  const txt = await res.text();
+  let json = null;
+  try { json = txt ? JSON.parse(txt) : null; } catch (_) {}
+  if (!res.ok) {
+    const msg = (json && (json.message || json.detail || json.error)) ? JSON.stringify(json) : (txt || ('HTTP ' + res.status));
+    throw new Error(msg);
+  }
+  return json;
+}
+
+function renderSchemaExplorer(schemaData) {
+  const grid = document.getElementById('schema-grid');
+  if (!grid) return;
+  const tables = Object.keys(schemaData || {});
+  if (tables.length === 0) {
+    grid.innerHTML = '<div class="schema-card"><div class="schema-card-head"><div class="schema-tname">No schema</div><div class="schema-cnt">0 columns</div></div><div class="schema-cols-list"><div class="schema-col-row"><span class="schema-col-name">No data available</span><span class="schema-col-type">N/A</span></div></div></div>';
+    return;
+  }
+
+  grid.innerHTML = tables.map(function(tableName){
+    const info = schemaData[tableName] || {};
+    const columns = Array.isArray(info.columns) ? info.columns : [];
+    const pks = new Set(Array.isArray(info.primary_keys) ? info.primary_keys : []);
+    const fkCols = new Set(Array.isArray(info.foreign_keys) ? info.foreign_keys.map(f => f.column) : []);
+    const colsHtml = columns.map(function(c){
+      const colName = c && c.column_name ? String(c.column_name) : '';
+      const dataType = c && c.data_type ? String(c.data_type).toUpperCase() : 'UNKNOWN';
+      const tag = pks.has(colName)
+        ? '<span class="pk-tag">PK</span>'
+        : (fkCols.has(colName) ? '<span class="fk-tag">FK</span>' : '');
+      return '<div class="schema-col-row"><span class="schema-col-name">' + escHtml(colName) + '</span><div style="display:flex;gap:4px;align-items:center">' + tag + '<span class="schema-col-type">' + escHtml(dataType) + '</span></div></div>';
+    }).join('');
+
+    return '<div class="schema-card"><div class="schema-card-head"><div class="schema-tname">' + escHtml(tableName) + '</div><div class="schema-cnt">' + columns.length + ' columns</div></div><div class="schema-cols-list">' + colsHtml + '</div></div>';
+  }).join('');
+}
+
 /* ── DB TYPE SELECT ── */
 var selectedEngine = 'postgresql';
 function selectDB(el, engine, port) {
@@ -847,19 +921,39 @@ function selectDB(el, engine, port) {
 }
 
 /* ── TEST CONNECTION ── */
-function testConn() {
+async function testConn() {
   var s = document.getElementById('conn-status');
   var m = document.getElementById('conn-msg');
   s.classList.remove('err');
   m.textContent = 'Testing connection…';
   s.classList.add('show');
-  setTimeout(function(){
-    m.textContent = 'Connected successfully';
-  }, 900);
+
+  const payload = {
+    engine: selectedEngine,
+    host: document.getElementById('inp-host').value,
+    port: Number(document.getElementById('inp-port').value || 0) || null,
+    database: document.getElementById('inp-dbname').value,
+    username: document.getElementById('inp-user').value,
+    password: document.getElementById('inp-pass').value,
+  };
+
+  try {
+    const out = await apiPost('/connect', payload);
+    if (out.ok) {
+      s.classList.remove('err');
+      m.textContent = 'Connected (Qdrant + PostgreSQL validated)';
+    } else {
+      s.classList.add('err');
+      m.textContent = (out.message || 'Connection failed');
+    }
+  } catch (e) {
+    s.classList.add('err');
+    m.textContent = 'Connection failed — ' + (e && e.message ? e.message : 'unknown error');
+  }
 }
 
 /* ── GO TO LOADING SCREEN ── */
-function goLoading() {
+async function goLoading() {
   var dbname = document.getElementById('inp-dbname').value || 'database';
   document.getElementById('loading-sub').textContent = 'Connecting to ' + dbname + '…';
   show('s-loading');
@@ -873,12 +967,51 @@ function goLoading() {
   var checkSVG = '<svg class="pp-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#19c490" stroke-width="1.5"/><path d="M5 8l2 2 4-4" stroke="#19c490" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var spinHTML = '<div class="spinner"></div>';
 
+  const payload = {
+    engine: selectedEngine,
+    host: document.getElementById('inp-host').value,
+    port: Number(document.getElementById('inp-port').value || 0) || null,
+    database: document.getElementById('inp-dbname').value,
+    username: document.getElementById('inp-user').value,
+    password: document.getElementById('inp-pass').value,
+  };
+  let connectOk = false;
+  let connectMessage = '';
+  let schemaPayload = null;
+  apiPost('/connect', payload)
+    .then(async out => {
+      connectOk = !!out.ok;
+      connectMessage = out.message || '';
+      if (connectOk) {
+        try {
+          schemaPayload = await apiGet('/schema');
+        } catch (e) {
+          schemaPayload = null;
+        }
+      }
+    })
+    .catch(err => { connectOk = false; connectMessage = (err && err.message) ? err.message : 'connect failed'; });
+
   function doStep(i) {
     if (i >= steps.length) {
       setTimeout(function(){
+        if (!connectOk) {
+          show('s-connect');
+          var s = document.getElementById('conn-status');
+          var m = document.getElementById('conn-msg');
+          s.classList.add('show');
+          s.classList.add('err');
+          m.textContent = 'Connect failed — ' + connectMessage;
+          return;
+        }
         var eng = selectedEngine.charAt(0).toUpperCase() + selectedEngine.slice(1);
         document.getElementById('topbar-db').textContent = dbname + ' · ' + eng;
-        document.getElementById('schema-meta').textContent = dbname + ' · ' + eng + ' · 12 tables';
+        if (schemaPayload && schemaPayload.ok) {
+          renderSchemaExplorer(schemaPayload.schema_data || {});
+          document.getElementById('schema-meta').textContent = dbname + ' · ' + eng + ' · ' + String(schemaPayload.table_count || 0) + ' tables';
+        } else {
+          document.getElementById('schema-meta').textContent = dbname + ' · ' + eng + ' · schema unavailable';
+        }
         show('s-app');
       }, 500);
       return;
@@ -919,76 +1052,28 @@ function switchTab(tab, btn) {
 /* ── MOCK HISTORY DATA ── */
 var historyData = [
   {
-    query: "What was the total revenue for last month?",
-    type: "SRD", note: "Standalone · no prior context needed",
-    tables: [
-      {name:"orders", cols:"order_id, created_at, total_amount, status, region"},
-      {name:"payments", cols:"payment_id, order_id, payment_date, amount, status"},
-      {name:"customers", cols:"customer_id, name, email"}
-    ],
-    sql: '<span class="kw">SELECT</span>\n  <span class="kw">SUM</span>(p.amount) <span class="kw">AS</span> total_revenue\n<span class="kw">FROM</span>   <span class="tname">orders</span> o\n<span class="kw">JOIN</span>   <span class="tname">payments</span> p <span class="kw">ON</span> o.order_id = p.order_id\n<span class="kw">WHERE</span>\n  p.status       = <span class="val">\'completed\'</span>\n  <span class="kw">AND</span> p.payment_date >= <span class="val">DATE_TRUNC</span>(<span class="val">\'month\'</span>, CURRENT_DATE - <span class="val">INTERVAL</span> <span class="val">\'1 month\'</span>)\n  <span class="kw">AND</span> p.payment_date &lt;  <span class="val">DATE_TRUNC</span>(<span class="val">\'month\'</span>, CURRENT_DATE);',
-    thead: ["total_revenue","currency","period","status"],
-    tbody: [["₹ 4,82,310.00","INR","March 2026",'<span class="ok">completed</span>']]
-  },
-  {
-    query: "Break that down by region",
-    type: "MRD", note: "Multi-round · combined with previous query",
-    tables: [
-      {name:"orders", cols:"order_id, region, total_amount"},
-      {name:"payments", cols:"payment_date, amount, status"}
-    ],
-    sql: '<span class="kw">SELECT</span>\n  o.region,\n  <span class="kw">SUM</span>(p.amount) <span class="kw">AS</span> total_revenue\n<span class="kw">FROM</span>   <span class="tname">orders</span> o\n<span class="kw">JOIN</span>   <span class="tname">payments</span> p <span class="kw">ON</span> o.order_id = p.order_id\n<span class="kw">WHERE</span>\n  p.status       = <span class="val">\'completed\'</span>\n  <span class="kw">AND</span> p.payment_date >= <span class="val">DATE_TRUNC</span>(<span class="val">\'month\'</span>, CURRENT_DATE - <span class="val">INTERVAL</span> <span class="val">\'1 month\'</span>)\n<span class="kw">GROUP BY</span> o.region\n<span class="kw">ORDER BY</span> total_revenue <span class="kw">DESC</span>;',
-    thead: ["region","total_revenue","pct_share"],
-    tbody: [
-      ["North","₹ 1,84,200","38.2%"],
-      ["West","₹ 1,41,600","29.4%"],
-      ["South","₹ 98,510","20.4%"],
-      ["East","₹ 58,000","12.0%"]
-    ]
-  },
-  {
-    query: "Top 5 products by sales",
-    type: "SRD", note: "Standalone · no prior context needed",
-    tables: [
-      {name:"order_items", cols:"order_id, product_id, quantity, unit_price"},
-      {name:"products", cols:"product_id, name, category"}
-    ],
-    sql: '<span class="kw">SELECT</span>\n  p.name <span class="kw">AS</span> product_name,\n  p.category,\n  <span class="kw">SUM</span>(oi.quantity * oi.unit_price) <span class="kw">AS</span> total_sales\n<span class="kw">FROM</span>   <span class="tname">order_items</span> oi\n<span class="kw">JOIN</span>   <span class="tname">products</span> p <span class="kw">ON</span> oi.product_id = p.product_id\n<span class="kw">GROUP BY</span> p.product_id, p.name, p.category\n<span class="kw">ORDER BY</span> total_sales <span class="kw">DESC</span>\n<span class="kw">LIMIT</span> <span class="val">5</span>;',
-    thead: ["product_name","category","total_sales"],
-    tbody: [
-      ["Smart LED TV 55\"","Electronics","₹ 92,400"],
-      ["Running Shoes Pro","Footwear","₹ 74,800"],
-      ["Wireless Headphones","Electronics","₹ 58,300"],
-      ["Office Chair Ergo","Furniture","₹ 47,200"],
-      ["Yoga Mat Premium","Sports","₹ 31,600"]
-    ]
-  },
-  {
-    query: "Customers who ordered more than twice",
-    type: "SRD", note: "Standalone · no prior context needed",
-    tables: [
-      {name:"customers", cols:"customer_id, name, email"},
-      {name:"orders", cols:"order_id, customer_id, created_at"}
-    ],
-    sql: '<span class="kw">SELECT</span>\n  c.name,\n  c.email,\n  <span class="kw">COUNT</span>(o.order_id) <span class="kw">AS</span> order_count\n<span class="kw">FROM</span>   <span class="tname">customers</span> c\n<span class="kw">JOIN</span>   <span class="tname">orders</span> o <span class="kw">ON</span> c.customer_id = o.customer_id\n<span class="kw">GROUP BY</span> c.customer_id, c.name, c.email\n<span class="kw">HAVING</span> <span class="kw">COUNT</span>(o.order_id) > <span class="val">2</span>\n<span class="kw">ORDER BY</span> order_count <span class="kw">DESC</span>;',
-    thead: ["name","email","order_count"],
-    tbody: [
-      ["Priya Sharma","priya@example.com","7"],
-      ["Rohit Mehta","rohit@example.com","5"],
-      ["Anita Rao","anita@example.com","4"],
-      ["Vikram Nair","vikram@example.com","3"]
-    ]
+    query: "Welcome to QueryNL2SQL!",
+    type: "SRD", note: "Ready to query the database",
+    tables: [{name:"instructions", cols:"type a query below"}],
+    sql: '<span class="kw">SELECT</span> <span class="val">*</span> <span class="kw">FROM</span> users <span class="kw">LIMIT</span> <span class="val">1</span>;',
+    raw_sql: 'SELECT * FROM users LIMIT 1;',
+    thead: ["status"],
+    tbody: [["Type a natural language query below and hit Run query."]]
   }
 ];
 
+let activeIdx = 0;
+
 function loadHistory(el, idx) {
+  if (!historyData[idx]) return;
+  activeIdx = idx;
   document.querySelectorAll('.hist-li').forEach(h => h.classList.remove('active'));
-  el.classList.add('active');
+  if (el) el.classList.add('active');
   var d = historyData[idx];
   document.getElementById('q-text').textContent = d.query;
   var typeChip = document.getElementById('q-type-chip');
   typeChip.textContent = d.type === 'SRD' ? 'SRD — single-round query' : 'MRD — multi-round query';
-  typeChip.className = 'chip ' + d.type.toLowerCase();
+  typeChip.className = 'chip ' + (d.type ? d.type.toLowerCase() : 'srd');
   document.getElementById('q-note').textContent = d.note;
   var tablesHTML = d.tables.map(function(t){
     return '<div class="tbl-chip"><div class="tbl-name">'+t.name+'</div><div class="tbl-cols">'+t.cols+'</div></div>';
@@ -1003,29 +1088,126 @@ function loadHistory(el, idx) {
   document.getElementById('res-body').innerHTML = tbody;
 }
 
-/* ── RUN QUERY (mock) ── */
-function runQuery() {
+function renderHistorySidebar() {
+  const el = document.getElementById('hist-list');
+  el.innerHTML = historyData.map(function(d, i){
+    const tagClass = d.type === 'MRD' ? 'mrd' : (d.type==='ERROR' ? 'mrd':'srd'); 
+    return '<div class="hist-li' + (i === activeIdx ? ' active' : '') + '" onclick="loadHistory(this, ' + i + ')">' +
+      '<span class="htag ' + tagClass + '">' + escHtml((d.type||'').substring(0,3)) + '</span>' + 
+      escHtml(d.query.substring(0,32) + (d.query.length > 32 ? '…' : '')) + '</div>';
+  }).join('');
+}
+
+/* ── RUN QUERY ── */
+async function runQuery() {
   var input = document.getElementById('nl-input');
   var q = input.value.trim();
   if (!q) return;
-  var isFollowUp = q.toLowerCase().startsWith('break') || q.toLowerCase().startsWith('also') || q.toLowerCase().startsWith('and') || q.toLowerCase().startsWith('now') || q.toLowerCase().startsWith('filter') || q.toLowerCase().startsWith('what about');
-  var type = isFollowUp ? 'MRD' : 'SRD';
-  var typeChip = document.getElementById('q-type-chip');
-  document.getElementById('q-text').textContent = q;
-  typeChip.textContent = type === 'SRD' ? 'SRD — single-round query' : 'MRD — multi-round query';
-  typeChip.className = 'chip ' + type.toLowerCase();
-  document.getElementById('q-note').textContent = type === 'MRD' ? 'Multi-round · combined with previous query' : 'Standalone · no prior context needed';
-  var newItem = document.createElement('div');
-  newItem.className = 'hist-li';
-  newItem.innerHTML = '<span class="htag '+type.toLowerCase()+'">'+type+'</span>' + q.substring(0,32) + (q.length > 32 ? '…' : '');
-  newItem.onclick = function(){ loadHistory(newItem, -1); };
-  document.querySelectorAll('.hist-li').forEach(h => h.classList.remove('active'));
-  newItem.classList.add('active');
-  document.getElementById('hist-list').prepend(newItem);
-  document.getElementById('sql-display').innerHTML = '<span class="cmt">-- Generating SQL for: ' + q.replace(/</g,'&lt;') + '</span>\n<span class="kw">SELECT</span> <span class="val">\'Connect backend to see real results\'</span> <span class="kw">AS</span> info;';
-  document.getElementById('tables-matched').innerHTML = '<div class="tbl-chip"><div class="tbl-name">...</div><div class="tbl-cols">matching tables via vector search</div></div>';
-  document.getElementById('res-body').innerHTML = '<tr><td colspan="4" style="color:var(--text3);font-style:italic">Backend not connected — this is a UI demo</td></tr>';
+
+  var newEntry = {
+    query: q,
+    type: "SRD", note: "Generating SQL...",
+    tables: [{name: "...", cols: "matching tables via vector search"}],
+    sql: '<span class="cmt">-- Generating SQL for: ' + escHtml(q) + '</span>',
+    raw_sql: '',
+    thead: ["status", "message"],
+    tbody: [["executing", "SQL is being generated."]]
+  };
+
+  historyData.unshift(newEntry);
+  activeIdx = 0;
+  renderHistorySidebar();
+  loadHistory(document.querySelector('.hist-li.active'), 0);
+
+  try {
+    const out = await apiPost('/query', { query: q, top_k: 5, session_id: sessionId });
+    sessionId = out.session_id;
+
+    const type = out.query_type || 'UNKNOWN';
+    const warnings = Array.isArray(out.warnings) ? out.warnings : [];
+    const baseNote = (type === 'MRD' ? 'Multi-round · combined with previous turns' : 'Standalone · no prior context needed');
+    
+    newEntry.type = type;
+    newEntry.note = warnings.length ? (baseNote + ' · ' + warnings[0]) : baseNote;
+    
+    const schema = out.schema || {};
+    const tbls = Object.keys(schema);
+    if (tbls.length === 0) {
+      newEntry.tables = [{name: "No match", cols: "No schema context found"}];
+    } else {
+      newEntry.tables = tbls.map(function(t){
+        const cols = (schema[t] && schema[t].columns) ? schema[t].columns.map(c => c.column_name).slice(0,10).join(', ') : '';
+        return {name: t, cols: cols || '...' };
+      });
+    }
+
+    if (out.sql) {
+      newEntry.sql = renderSQL(out.sql);
+      newEntry.raw_sql = out.sql; 
+    } else {
+      const firstWarn = (warnings.length > 0) ? warnings[0] : 'No SQL generated (schema mismatch or model unavailable)';
+      newEntry.sql = '<span class="cmt">-- ' + escHtml(firstWarn) + '</span>';
+      newEntry.raw_sql = '';
+    }
+
+    newEntry.thead = ["status", "message", "session_id", "sql_valid"];
+    newEntry.tbody = [
+      ["ready", warnings.length ? warnings.join(' | ') : "SQL is ready. Click Execute to run.", out.session_id, String(!!out.sql_valid)]
+    ];
+
+  } catch (e) {
+    newEntry.type = "ERROR";
+    newEntry.note = "Backend error (see results panel)";
+    newEntry.tables = [{name:"error", cols:"failed to fetch schema/sql"}];
+    newEntry.sql = '<span class="cmt">-- Backend error: ' + escHtml(e && e.message ? e.message : 'unknown') + '</span>';
+    newEntry.raw_sql = '';
+    newEntry.thead = ['error'];
+    newEntry.tbody = [['Backend error — ' + escHtml(e && e.message ? e.message : 'unknown')]];
+  }
+
+  renderHistorySidebar();
+  loadHistory(document.querySelector('.hist-li.active'), 0);
   input.value = '';
+}
+
+/* ── EXECUTE SQL ── */
+async function executeSQL() {
+  const d = historyData[activeIdx];
+  if (!d || !d.raw_sql) {
+      alert("No valid SQL found to execute!");
+      return;
+  }
+  
+  const payload = {
+    engine: selectedEngine,
+    host: document.getElementById('inp-host').value,
+    port: Number(document.getElementById('inp-port').value || 0) || null,
+    database: document.getElementById('inp-dbname').value,
+    username: document.getElementById('inp-user').value,
+    password: document.getElementById('inp-pass').value,
+    sql: d.raw_sql
+  };
+
+  document.querySelector('.res-table thead tr').innerHTML = '<th>status</th>';
+  document.getElementById('res-body').innerHTML = '<tr><td style="color:var(--teal)">Executing query on db...</td></tr>';
+
+  try {
+    const out = await apiPost('/execute', payload);
+    if (!out.ok) {
+       d.thead = ["error"];
+       d.tbody = [[out.error]];
+    } else if (out.columns && out.columns.length > 0) {
+       d.thead = out.columns;
+       d.tbody = out.rows.length ? out.rows : [["No rows returned."]];
+    } else {
+       d.thead = ["status"];
+       d.tbody = [["Query executed successfully (no rows returned)."]];
+    }
+  } catch (e) {
+       d.thead = ["error"];
+       d.tbody = [[e.message]];
+  }
+  loadHistory(document.querySelector('.hist-li.active'), activeIdx);
 }
 
 function handleKey(e) {
