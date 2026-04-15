@@ -33,3 +33,4 @@ build/
 # Project Specific
 serialized_schema.txt
 cursor_fastapi_server_setup_with_search.md
+Tests/
