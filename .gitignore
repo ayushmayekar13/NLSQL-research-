@@ -32,5 +32,9 @@ build/
 
 # Project Specific
 serialized_schema.txt
+
+# Node / Vite
+node_modules/
+dist/
 cursor_fastapi_server_setup_with_search.md
 Tests/
