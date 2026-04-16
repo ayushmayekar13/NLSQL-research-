@@ -14,7 +14,15 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # ─────────────────────────────────────────────
 # Load classifier
 # ─────────────────────────────────────────────
-with open("srd_mrd_classifier.pkl", "rb") as f:
+import os
+import pickle
+
+_dir = os.path.dirname(os.path.abspath(__file__))
+_pkl_path = os.path.join(_dir, "srd_mrd_classifier.pkl")
+if not os.path.exists(_pkl_path):
+    _pkl_path = "srd_mrd_classifier.pkl"
+
+with open(_pkl_path, "rb") as f:
     vectorizer, model = pickle.load(f)
 
 def predict_query_with_confidence(query):

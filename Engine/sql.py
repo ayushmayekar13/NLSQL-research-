@@ -14,8 +14,8 @@ from google import genai
 import json
 from typing import Any, Dict, Optional
 
-from qdrant_client import QdrantClient
 from sentence_transformers import SentenceTransformer
+import httpx
 
 
 class NL2SQL:
@@ -191,12 +191,10 @@ class SchemaRetriever:
 
         self.collection_name = collection_name
         self.context_file = context_file
+        self.qdrant_host = qdrant_host
+        self.qdrant_port = qdrant_port
+        self.base_url = f"http://{qdrant_host}:{qdrant_port}"
 
-        self.db = QdrantClient(
-            host=qdrant_host,
-            port=qdrant_port,
-            check_compatibility=check_compatibility,
-        )
         self.model = SentenceTransformer(model_name)
 
     def search_schema(self, query_text: str, top_k: int = 5, collection_name: Optional[str] = None):
@@ -204,22 +202,30 @@ class SchemaRetriever:
         query_vector = self.model.encode(query_text).tolist()
         print("[SchemaRetriever] Similarity search performed")
 
-        # Your notebook uses query_points() (server-side API wrapper)
-        return self.db.query_points(
-            collection_name=collection,
-            query=query_vector,
-            limit=top_k,
-        )
+        url = f"{self.base_url}/collections/{collection}/points/search"
+        payload = {
+            "vector": query_vector,
+            "limit": top_k,
+            "with_payload": True,
+        }
+        with httpx.Client(timeout=5.0) as client:
+            r = client.post(url, json=payload)
+            r.raise_for_status()
+            return r.json()
 
     def get_top_context_object(self, search_results, context_file: Optional[str] = None) -> Optional[Dict[str, Any]]:
         context_path = context_file or self.context_file
 
-        if not search_results or not getattr(search_results, "points", None):
+        points = None
+        if isinstance(search_results, dict):
+            points = search_results.get("result")
+
+        if not points:
             return None
 
-        top_hit = search_results.points[0]
-        payload = getattr(top_hit, "payload", None) or {}
-        table_name = payload.get("table")
+        top_hit = points[0] or {}
+        payload = top_hit.get("payload") or {}
+        table_name = (payload or {}).get("table")
         if not table_name:
             return None
 
