@@ -106,11 +106,11 @@
     </div>
     <div class="pp-step" id="pp3">
       <svg class="pp-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#555b6a" stroke-width="1.5"/></svg>
-      <span>Generating embeddings</span>
+      <span>Generating context</span>
     </div>
     <div class="pp-step" id="pp4">
       <svg class="pp-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#555b6a" stroke-width="1.5"/></svg>
-      <span>Building vector index</span>
+      <span>Upserting embeddings</span>
     </div>
     <div class="pp-step" id="pp5">
       <svg class="pp-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#555b6a" stroke-width="1.5"/></svg>
@@ -133,6 +133,7 @@
     </div>
     <div class="topbar-right">
       <div class="db-badge"><span class="dot"></span><span id="topbar-db">ecommerce_db · PostgreSQL</span></div>
+      <button class="disc-btn" onclick="resetIndex()" title="Delete Qdrant collections so you can re-index">Reset Index</button>
       <button class="disc-btn" onclick="disconnect()">Disconnect</button>
     </div>
   </div>

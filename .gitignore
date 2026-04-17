@@ -38,3 +38,4 @@ node_modules/
 dist/
 cursor_fastapi_server_setup_with_search.md
 Tests/
+View_Selection/

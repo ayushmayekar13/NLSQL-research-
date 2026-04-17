@@ -22,9 +22,9 @@ from Engine.sql import SchemaRetriever, NL2SQL
 def _get_nl2sql(model_name: str):
     return NL2SQL(model_name=model_name)
 
-@lru_cache(maxsize=1)
-def _get_retriever():
-    return SchemaRetriever()
+@lru_cache(maxsize=8)
+def _get_retriever(collection_name: str = "table", context_file: str = "View_Selection/context.json"):
+    return SchemaRetriever(collection_name=collection_name, context_file=context_file)
 
 def _extract_matched_tables(schema: dict[str, Any] | None) -> list[str]:
     if not schema:
@@ -54,10 +54,18 @@ def _looks_like_null(sql: str) -> bool:
     return bool(re.fullmatch(r"null;?", sql.strip(), flags=re.IGNORECASE))
 
 
-def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = None) -> dict[str, Any]:
+def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = None, database_name: str | None = None) -> dict[str, Any]:
     settings = get_settings()
     session_id = session_id or str(uuid.uuid4())
     warnings: list[str] = []
+
+    # Resolve collection name and context file based on database
+    if database_name:
+        collection = f"{database_name}-table"
+        context_file = f"View_Selection/{database_name}_context.json"
+    else:
+        collection = settings.qdrant_collection
+        context_file = str(settings.context_json_path)
 
     # 1. Classification & Resolution (via Engine)
     confidence = None
@@ -81,7 +89,7 @@ def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = N
     # 2. Schema Retrieval (via Engine)
     schema: dict[str, Any] | None = None
     try:
-        retriever = _get_retriever()
+        retriever = _get_retriever(collection, context_file)
         schema = retriever.retrieve(resolved_query, top_k=top_k)
         if not schema:
             warnings.append("No matching schema context found for query.")
@@ -137,4 +145,55 @@ def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = N
         "can_execute": False,
         "warnings": warnings,
     }
+
+
+def fix_sql_with_gemini(database_name: str, nl_query: str, failed_sql: str, error_msg: str) -> str | None:
+    settings = get_settings()
+    collection = f"{database_name}-table"
+    context_file = f"View_Selection/{database_name}_context.json"
+    
+    try:
+        retriever = _get_retriever(collection, context_file)
+        schema = retriever.retrieve(nl_query, top_k=5)
+    except Exception:
+        return None
+        
+    if not schema:
+        return None
+        
+    try:
+        nl2sql = _get_nl2sql(settings.gemini_model_name)
+        schema_text = nl2sql._schema_to_text(schema)
+        
+        prompt = f"""You are a Text-to-SQL system.
+
+Convert the natural language query into a valid PostgreSQL SQL query.
+Constraints:
+- Use ONLY tables and columns from the schema
+- Return ONLY SQL
+- End the SQL with a semicolon. Do not wrap in markdown fences.
+
+Schema:
+{schema_text}
+
+Query:
+{nl_query}
+
+=== PREVIOUS ATTEMPT FAILED ===
+You previously generated this SQL:
+{failed_sql}
+
+It resulted in this error from the PostgreSQL database:
+{error_msg}
+
+Please correct the SQL query to fix this error. 
+Return ONLY the corrected valid PostgreSQL SQL query. Do not include explanations. Ensure the syntax is correct. End with a semicolon.
+SQL:
+"""
+        output_text = nl2sql._call_gemini(prompt)
+        fixed_sql = nl2sql._extract_sql(output_text)
+        return fixed_sql
+    except Exception as e:
+        print(f"[Engine] Failed to fix SQL via Gemini: {e}")
+        return None
 

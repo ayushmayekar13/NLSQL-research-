@@ -1,409 +1,753 @@
 {
-    "budgets": {
-        "table_description": "Stores user-defined spending limits categorized by specific types of expenses.",
+    "data_src": {
         "columns": [
             {
-                "column_name": "budget_id",
-                "data_type": "integer",
+                "column_name": "datasrc_id",
+                "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for each budget record."
+                "description": "A unique identifier for the data source."
             },
             {
-                "column_name": "user_id",
+                "column_name": "authors",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The author(s) of the publication or article."
+            },
+            {
+                "column_name": "title",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The title of the publication or research article."
+            },
+            {
+                "column_name": "year",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "Identifier of the user associated with this budget."
+                "description": "The year in which the data source was published."
             },
             {
-                "column_name": "category",
-                "data_type": "character varying",
+                "column_name": "journal",
+                "data_type": "text",
                 "is_indexed": false,
-                "description": "The expense category or label for which the budget is set."
+                "description": "The name of the journal or publication where the data source was published."
             },
             {
-                "column_name": "limit_amount",
-                "data_type": "numeric",
+                "column_name": "vol_city",
+                "data_type": "text",
                 "is_indexed": false,
-                "description": "The maximum monetary amount allocated to this budget category."
+                "description": "The volume number of the journal or the city of publication."
+            },
+            {
+                "column_name": "issue_state",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The issue number of the journal or the state of publication."
+            },
+            {
+                "column_name": "start_page",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The starting page number of the article within the publication."
+            },
+            {
+                "column_name": "end_page",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The ending page number of the article within the publication."
             }
         ],
         "primary_keys": [
-            "budget_id"
-        ],
-        "foreign_keys": [
-            {
-                "column": "user_id",
-                "references_table": "users",
-                "references_column": "id"
-            }
-        ],
-        "sample_rows": [
-            {
-                "budget_id": 1,
-                "user_id": 1,
-                "category": "Entertainment",
-                "limit_amount": 50.0
-            },
-            {
-                "budget_id": 2,
-                "user_id": 1,
-                "category": "Music",
-                "limit_amount": 30.0
-            }
-        ]
-    },
-    "reminders": {
-        "table_description": "Stores a historical record of notifications or reminders sent to users regarding their subscriptions.",
-        "columns": [
-            {
-                "column_name": "r_id",
-                "data_type": "integer",
-                "is_indexed": true,
-                "description": "The unique primary identifier for each reminder record."
-            },
-            {
-                "column_name": "sub_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "Reference to the subscription record associated with this reminder notification."
-            },
-            {
-                "column_name": "user_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "Reference to the unique identifier of the user who received the reminder."
-            },
-            {
-                "column_name": "reminder_sent_at",
-                "data_type": "timestamp without time zone",
-                "is_indexed": false,
-                "description": "The date and time at which the reminder was dispatched to the user."
-            }
-        ],
-        "primary_keys": [
-            "r_id"
-        ],
-        "foreign_keys": [
-            {
-                "column": "sub_id",
-                "references_table": "subscriptions_old",
-                "references_column": "sub_id"
-            },
-            {
-                "column": "user_id",
-                "references_table": "users",
-                "references_column": "id"
-            }
-        ],
-        "sample_rows": [
-            {
-                "r_id": 1,
-                "sub_id": 1,
-                "user_id": 1,
-                "reminder_sent_at": "2026-01-15T10:00:00"
-            },
-            {
-                "r_id": 2,
-                "sub_id": 2,
-                "user_id": 1,
-                "reminder_sent_at": "2026-01-16T12:00:00"
-            }
-        ]
-    },
-    "subscriptions": {
-        "table_description": "Stores detailed records of user-specific subscriptions, including service names, billing terms, costs, and current activity status.",
-        "columns": [
-            {
-                "column_name": "sub_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "The unique primary identifier for each subscription record."
-            },
-            {
-                "column_name": "user_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "The foreign key linking the subscription to a specific user account."
-            },
-            {
-                "column_name": "sub_name",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The name of the service provider or platform being subscribed to."
-            },
-            {
-                "column_name": "cost",
-                "data_type": "numeric",
-                "is_indexed": false,
-                "description": "The monetary amount charged for the subscription service per billing cycle."
-            },
-            {
-                "column_name": "category",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The industry or type classification of the service, such as Music or Entertainment."
-            },
-            {
-                "column_name": "billing_cycle",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The recurring frequency of payment for the subscription service."
-            },
-            {
-                "column_name": "payment_method",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The financial instrument used to pay for the subscription."
-            },
-            {
-                "column_name": "is_active",
-                "data_type": "boolean",
-                "is_indexed": false,
-                "description": "A flag indicating whether the subscription is currently active or deactivated."
-            },
-            {
-                "column_name": "usage_score",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "A metric representing the user's level of engagement or activity with the service."
-            }
-        ],
-        "primary_keys": [
-            "sub_id",
-            "billing_cycle",
-            "is_active"
-        ],
-        "foreign_keys": [
-            {
-                "column": "user_id",
-                "references_table": "users",
-                "references_column": "id"
-            }
-        ],
-        "sample_rows": [
-            {
-                "sub_id": 1,
-                "user_id": 1,
-                "sub_name": "Netflix",
-                "cost": 500.0,
-                "category": "Entertainment",
-                "billing_cycle": "Monthly",
-                "payment_method": "Credit Card",
-                "is_active": true,
-                "usage_score": 80
-            },
-            {
-                "sub_id": 2,
-                "user_id": 1,
-                "sub_name": "Spotify",
-                "cost": 120.0,
-                "category": "Music",
-                "billing_cycle": "Monthly",
-                "payment_method": "Debit Card",
-                "is_active": true,
-                "usage_score": 70
-            }
-        ]
-    },
-    "subscriptions_old": {
-        "table_description": "This table stores legacy records of user subscriptions, detailing service names, financial costs, and usage metrics.",
-        "columns": [
-            {
-                "column_name": "sub_id",
-                "data_type": "integer",
-                "is_indexed": true,
-                "description": "Unique identifier for each subscription record."
-            },
-            {
-                "column_name": "user_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "The unique identifier of the user associated with the subscription."
-            },
-            {
-                "column_name": "sub_name",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The name of the service or subscription provider."
-            },
-            {
-                "column_name": "cost",
-                "data_type": "numeric",
-                "is_indexed": false,
-                "description": "The recurring cost of the subscription."
-            },
-            {
-                "column_name": "category",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The classification of the subscription service, such as entertainment or music."
-            },
-            {
-                "column_name": "billing_cycle",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The frequency at which the subscription is billed, such as monthly or annually."
-            },
-            {
-                "column_name": "payment_method",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The primary method used for paying the subscription fees."
-            },
-            {
-                "column_name": "is_active",
-                "data_type": "boolean",
-                "is_indexed": false,
-                "description": "A flag indicating whether the subscription is currently in use."
-            },
-            {
-                "column_name": "usage_score",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "A calculated metric representing the user's engagement level with the service."
-            }
-        ],
-        "primary_keys": [
-            "sub_id"
-        ],
-        "foreign_keys": [
-            {
-                "column": "user_id",
-                "references_table": "users",
-                "references_column": "id"
-            }
-        ],
-        "sample_rows": [
-            {
-                "sub_id": 1,
-                "user_id": 1,
-                "sub_name": "Netflix",
-                "cost": 500.0,
-                "category": "Entertainment",
-                "billing_cycle": "Monthly",
-                "payment_method": "Credit Card",
-                "is_active": true,
-                "usage_score": 80
-            },
-            {
-                "sub_id": 2,
-                "user_id": 1,
-                "sub_name": "Spotify",
-                "cost": 120.0,
-                "category": "Music",
-                "billing_cycle": "Monthly",
-                "payment_method": "Debit Card",
-                "is_active": true,
-                "usage_score": 70
-            }
-        ]
-    },
-    "usage_logs": {
-        "table_description": "Stores historical weekly resource consumption records associated with specific subscriptions.",
-        "columns": [
-            {
-                "column_name": "usage_id",
-                "data_type": "integer",
-                "is_indexed": true,
-                "description": "Unique identifier for each usage log entry."
-            },
-            {
-                "column_name": "sub_id",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "Reference to the subscription associated with the recorded usage."
-            },
-            {
-                "column_name": "used",
-                "data_type": "numeric",
-                "is_indexed": false,
-                "description": "The numerical amount of service or resource consumed."
-            },
-            {
-                "column_name": "week_start_date",
-                "data_type": "date",
-                "is_indexed": false,
-                "description": "The beginning date of the week for which the usage is logged."
-            }
-        ],
-        "primary_keys": [
-            "usage_id"
-        ],
-        "foreign_keys": [
-            {
-                "column": "sub_id",
-                "references_table": "subscriptions_old",
-                "references_column": "sub_id"
-            }
-        ],
-        "sample_rows": [
-            {
-                "usage_id": 1,
-                "sub_id": 1,
-                "used": 10.0,
-                "week_start_date": "2026-01-01"
-            },
-            {
-                "usage_id": 2,
-                "sub_id": 2,
-                "used": 5.0,
-                "week_start_date": "2026-01-01"
-            }
-        ]
-    },
-    "users": {
-        "table_description": "This table stores individual user account details including credentials and demographic information.",
-        "columns": [
-            {
-                "column_name": "id",
-                "data_type": "integer",
-                "is_indexed": true,
-                "description": "A unique numerical identifier for each user record."
-            },
-            {
-                "column_name": "name",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The full name or display name of the user."
-            },
-            {
-                "column_name": "email",
-                "data_type": "character varying",
-                "is_indexed": true,
-                "description": "The primary email address associated with the user account."
-            },
-            {
-                "column_name": "password",
-                "data_type": "character varying",
-                "is_indexed": false,
-                "description": "The sensitive authentication credential for account access."
-            },
-            {
-                "column_name": "age",
-                "data_type": "integer",
-                "is_indexed": false,
-                "description": "The chronological age of the user in years."
-            }
-        ],
-        "primary_keys": [
-            "id"
+            "datasrc_id"
         ],
         "foreign_keys": [],
         "sample_rows": [
             {
-                "id": 2,
-                "name": "Ayush",
-                "email": "ayushmayekar@gmail.com",
-                "password": "Ayush@12",
-                "age": 21
+                "datasrc_id": "D1066 ",
+                "authors": "G.V. Mann",
+                "title": "The Health and Nutritional status of Alaskan Eskimos.",
+                "year": 1962,
+                "journal": "American Journal of Clinical Nutrition",
+                "vol_city": "11",
+                "issue_state": "",
+                "start_page": "31",
+                "end_page": "76"
             },
             {
-                "id": 3,
-                "name": "Chetan",
-                "email": "chetankatkar@gmail.com",
-                "password": "Chetan@03",
-                "age": 20
+                "datasrc_id": "D1073 ",
+                "authors": "J.P. McBride, R.A. Maclead",
+                "title": "Sodium and potassium in fish from the Canadian Pacific coast.",
+                "year": 1956,
+                "journal": "Journal of the American Dietetic Association",
+                "vol_city": "32",
+                "issue_state": "",
+                "start_page": "636",
+                "end_page": "638"
+            }
+        ],
+        "table_description": "This table stores metadata and citation details for various data sources, typically research publications or articles."
+    },
+    "datsrcln": {
+        "columns": [
+            {
+                "column_name": "ndb_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "The unique identifier for a food item from the National Nutrient Database."
+            },
+            {
+                "column_name": "nutr_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "The unique identifier for a specific nutrient."
+            },
+            {
+                "column_name": "datasrc_id",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "The unique identifier for the data source that provided the information."
+            }
+        ],
+        "primary_keys": [
+            "ndb_no",
+            "nutr_no",
+            "datasrc_id"
+        ],
+        "foreign_keys": [
+            {
+                "column": "datasrc_id",
+                "references_table": "data_src",
+                "references_column": "datasrc_id"
+            },
+            {
+                "column": "ndb_no",
+                "references_table": "nut_data",
+                "references_column": "ndb_no"
+            },
+            {
+                "column": "ndb_no",
+                "references_table": "nut_data",
+                "references_column": "nutr_no"
+            },
+            {
+                "column": "nutr_no",
+                "references_table": "nut_data",
+                "references_column": "ndb_no"
+            },
+            {
+                "column": "nutr_no",
+                "references_table": "nut_data",
+                "references_column": "nutr_no"
+            }
+        ],
+        "sample_rows": [
+            {
+                "ndb_no": "01026",
+                "nutr_no": "203",
+                "datasrc_id": "S25   "
+            },
+            {
+                "ndb_no": "01029",
+                "nutr_no": "203",
+                "datasrc_id": "S27   "
+            }
+        ],
+        "table_description": "This table identifies the data sources for each food-nutrient combination."
+    },
+    "deriv_cd": {
+        "columns": [
+            {
+                "column_name": "deriv_cd",
+                "data_type": "text",
+                "is_indexed": true,
+                "description": "A unique code representing the method of data derivation or its documentation status."
+            },
+            {
+                "column_name": "derivcd_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "A descriptive explanation of the data derivation code."
+            }
+        ],
+        "primary_keys": [
+            "deriv_cd"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "deriv_cd": "A",
+                "derivcd_desc": "Analytical data"
+            },
+            {
+                "deriv_cd": "AI",
+                "derivcd_desc": "Analytical data; from the literature or  government;  incomplete documentation"
+            }
+        ],
+        "table_description": "This table defines codes for data derivation or documentation status, along with their corresponding descriptions."
+    },
+    "fd_group": {
+        "columns": [
+            {
+                "column_name": "fdgrp_cd",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "This column stores a unique code identifying each food group."
+            },
+            {
+                "column_name": "fddrp_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "This column provides a textual description of the food group."
+            }
+        ],
+        "primary_keys": [
+            "fdgrp_cd"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "fdgrp_cd": "0100",
+                "fddrp_desc": "Dairy and Egg Products"
+            },
+            {
+                "fdgrp_cd": "0200",
+                "fddrp_desc": "Spices and Herbs"
+            }
+        ],
+        "table_description": "This table categorizes food items into distinct groups."
+    },
+    "food_des": {
+        "columns": [
+            {
+                "column_name": "ndb_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for each food item, typically from a national nutrient database."
+            },
+            {
+                "column_name": "fdgrp_cd",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Code identifying the food group to which the food item belongs."
+            },
+            {
+                "column_name": "long_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The complete descriptive name of the food item."
+            },
+            {
+                "column_name": "shrt_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "An abbreviated descriptive name for the food item."
+            },
+            {
+                "column_name": "comname",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The common or household name for the food item."
+            },
+            {
+                "column_name": "manufacname",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The name of the manufacturer or brand for commercial food products."
+            },
+            {
+                "column_name": "survey",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "Indicates if the food item was part of a specific dietary survey."
+            },
+            {
+                "column_name": "ref_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "Description of the refuse (inedible portion) associated with the food item."
+            },
+            {
+                "column_name": "refuse",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The percentage of refuse or inedible material for the food item."
+            },
+            {
+                "column_name": "sciname",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The scientific name of the food item, especially for plant or animal sources."
+            },
+            {
+                "column_name": "n_factor",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The nitrogen factor used for calculating protein content."
+            },
+            {
+                "column_name": "pro_factor",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The protein factor used in energy calculations."
+            },
+            {
+                "column_name": "fat_factor",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The fat factor used in energy calculations."
+            },
+            {
+                "column_name": "cho_factor",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The carbohydrate factor used in energy calculations."
+            }
+        ],
+        "primary_keys": [
+            "ndb_no"
+        ],
+        "foreign_keys": [
+            {
+                "column": "fdgrp_cd",
+                "references_table": "fd_group",
+                "references_column": "fdgrp_cd"
+            }
+        ],
+        "sample_rows": [
+            {
+                "ndb_no": "01001",
+                "fdgrp_cd": "0100",
+                "long_desc": "Butter, salted",
+                "shrt_desc": "BUTTER,WITH SALT",
+                "comname": "",
+                "manufacname": "",
+                "survey": "Y",
+                "ref_desc": "",
+                "refuse": 0,
+                "sciname": "",
+                "n_factor": 6.38,
+                "pro_factor": 4.27,
+                "fat_factor": 8.79,
+                "cho_factor": 3.87
+            },
+            {
+                "ndb_no": "01002",
+                "fdgrp_cd": "0100",
+                "long_desc": "Butter, whipped, with salt",
+                "shrt_desc": "BUTTER,WHIPPED,WITH SALT",
+                "comname": "",
+                "manufacname": "",
+                "survey": "Y",
+                "ref_desc": "",
+                "refuse": 0,
+                "sciname": "",
+                "n_factor": 6.38,
+                "pro_factor": 4.27,
+                "fat_factor": 8.79,
+                "cho_factor": 3.87
+            }
+        ],
+        "table_description": "This table provides comprehensive descriptive information for various food items, including their names, origins, and factors used in nutritional calculations."
+    },
+    "footnote": {
+        "columns": [
+            {
+                "column_name": "ndb_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for the food item to which the footnote applies, referencing the food_des table."
+            },
+            {
+                "column_name": "footnt_no",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "The specific footnote number associated with the food item."
+            },
+            {
+                "column_name": "footnt_typ",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "The type of footnote, categorizing its content or purpose."
+            },
+            {
+                "column_name": "nutr_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for the nutrient to which the footnote applies, if specific to a nutrient, referencing the nutr_def table."
+            },
+            {
+                "column_name": "footnt_txt",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The complete textual content of the footnote."
+            }
+        ],
+        "primary_keys": [],
+        "foreign_keys": [
+            {
+                "column": "ndb_no",
+                "references_table": "food_des",
+                "references_column": "ndb_no"
+            },
+            {
+                "column": "nutr_no",
+                "references_table": "nutr_def",
+                "references_column": "nutr_no"
+            }
+        ],
+        "sample_rows": [
+            {
+                "ndb_no": "02048",
+                "footnt_no": "01  ",
+                "footnt_typ": "D",
+                "nutr_no": null,
+                "footnt_txt": "Contains 5% acetic acid.  Total proximates do not equal 100%."
+            }
+        ],
+        "table_description": "This table stores explanatory footnotes providing additional details or context for specific food items or nutrients within the database."
+    },
+    "nut_data": {
+        "columns": [
+            {
+                "column_name": "ndb_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for the food item, linking to the food description table."
+            },
+            {
+                "column_name": "nutr_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for the nutrient, linking to the nutrient definition table."
+            },
+            {
+                "column_name": "nutr_val",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The measured or calculated value of the nutrient in the food item."
+            },
+            {
+                "column_name": "num_data_pts",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The number of data points used to calculate the nutrient value."
+            },
+            {
+                "column_name": "std_error",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The standard error of the mean for the nutrient value."
+            },
+            {
+                "column_name": "src_cd",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "Code indicating the source of the data for the nutrient value."
+            },
+            {
+                "column_name": "deriv_cd",
+                "data_type": "text",
+                "is_indexed": true,
+                "description": "Code indicating the method used to derive the nutrient value."
+            },
+            {
+                "column_name": "ref_ndb_no",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "Reference NDB number for cases where the nutrient value is derived from another food item."
+            },
+            {
+                "column_name": "add_nutr_mark",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "Additional mark or flag related to the nutrient data."
+            },
+            {
+                "column_name": "num_studies",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The number of studies used to determine the nutrient value."
+            },
+            {
+                "column_name": "min",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The minimum observed value for the nutrient."
+            },
+            {
+                "column_name": "max",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The maximum observed value for the nutrient."
+            },
+            {
+                "column_name": "df",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "Degrees of freedom for statistical analysis of the nutrient value."
+            },
+            {
+                "column_name": "low_eb",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The lower error bound of the nutrient value."
+            },
+            {
+                "column_name": "up_eb",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The upper error bound of the nutrient value."
+            },
+            {
+                "column_name": "stat_cmt",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "Comments related to the statistical derivation or quality of the nutrient data."
+            },
+            {
+                "column_name": "cc",
+                "data_type": "character",
+                "is_indexed": false,
+                "description": "Confidence code indicating the reliability of the nutrient value."
+            }
+        ],
+        "primary_keys": [
+            "ndb_no",
+            "nutr_no"
+        ],
+        "foreign_keys": [
+            {
+                "column": "deriv_cd",
+                "references_table": "deriv_cd",
+                "references_column": "deriv_cd"
+            },
+            {
+                "column": "ndb_no",
+                "references_table": "food_des",
+                "references_column": "ndb_no"
+            },
+            {
+                "column": "nutr_no",
+                "references_table": "nutr_def",
+                "references_column": "nutr_no"
+            },
+            {
+                "column": "src_cd",
+                "references_table": "src_cd",
+                "references_column": "src_cd"
+            }
+        ],
+        "sample_rows": [
+            {
+                "ndb_no": "01001",
+                "nutr_no": "205",
+                "nutr_val": 0.06,
+                "num_data_pts": 0.0,
+                "std_error": null,
+                "src_cd": 4,
+                "deriv_cd": "NC",
+                "ref_ndb_no": "     ",
+                "add_nutr_mark": " ",
+                "num_studies": null,
+                "min": null,
+                "max": null,
+                "df": null,
+                "low_eb": null,
+                "up_eb": null,
+                "stat_cmt": "",
+                "cc": null
+            },
+            {
+                "ndb_no": "01001",
+                "nutr_no": "208",
+                "nutr_val": 717.0,
+                "num_data_pts": 0.0,
+                "std_error": null,
+                "src_cd": 4,
+                "deriv_cd": "NC",
+                "ref_ndb_no": "     ",
+                "add_nutr_mark": " ",
+                "num_studies": null,
+                "min": null,
+                "max": null,
+                "df": null,
+                "low_eb": null,
+                "up_eb": null,
+                "stat_cmt": "",
+                "cc": null
+            }
+        ],
+        "table_description": "This table stores detailed nutritional values and related statistical data for specific food items, linking them to food and nutrient definitions."
+    },
+    "nutr_def": {
+        "columns": [
+            {
+                "column_name": "nutr_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "A unique identifier for each nutrient."
+            },
+            {
+                "column_name": "units",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The standard unit of measurement for the nutrient (e.g., 'g', 'mg')."
+            },
+            {
+                "column_name": "tagname",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "A common short name or tag used to identify the nutrient."
+            },
+            {
+                "column_name": "nutrdesc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "The full descriptive name of the nutrient."
+            },
+            {
+                "column_name": "num_dec",
+                "data_type": "smallint",
+                "is_indexed": false,
+                "description": "The recommended number of decimal places for displaying the nutrient's value."
+            },
+            {
+                "column_name": "sr_order",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "An integer indicating the display or sort order for the nutrient."
+            }
+        ],
+        "primary_keys": [
+            "nutr_no"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "nutr_no": "203",
+                "units": "g",
+                "tagname": "PROCNT",
+                "nutrdesc": "Protein",
+                "num_dec": 2,
+                "sr_order": 600
+            },
+            {
+                "nutr_no": "204",
+                "units": "g",
+                "tagname": "FAT",
+                "nutrdesc": "Total lipid (fat)",
+                "num_dec": 2,
+                "sr_order": 800
+            }
+        ],
+        "table_description": "This table defines various nutrients, including their unique identifiers, units, common tags, and full descriptions."
+    },
+    "src_cd": {
+        "table_description": "This table defines and describes various source codes used to categorize the origin or derivation of data.",
+        "columns": [
+            {
+                "column_name": "src_cd",
+                "data_type": "integer",
+                "is_indexed": true,
+                "description": "The unique identifier for a data source code."
+            },
+            {
+                "column_name": "srccd_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "A textual description explaining the meaning of the source code."
+            }
+        ],
+        "primary_keys": [
+            "src_cd"
+        ],
+        "foreign_keys": [],
+        "sample_rows": [
+            {
+                "src_cd": 1,
+                "srccd_desc": "Analytical or derived from analytical"
+            },
+            {
+                "src_cd": 4,
+                "srccd_desc": "Imputed"
             }
         ]
+    },
+    "weight": {
+        "columns": [
+            {
+                "column_name": "ndb_no",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Unique identifier for the food item, linking to the food description table."
+            },
+            {
+                "column_name": "seq",
+                "data_type": "character",
+                "is_indexed": true,
+                "description": "Sequence number for different household measures of the same food item."
+            },
+            {
+                "column_name": "amount",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The quantity of the household measure (e.g., 1 for 1 cup)."
+            },
+            {
+                "column_name": "msre_desc",
+                "data_type": "text",
+                "is_indexed": false,
+                "description": "Textual description of the household measure (e.g., 'cup', 'tablespoon')."
+            },
+            {
+                "column_name": "gm_wgt",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The gram weight equivalent of the specified amount and measure."
+            },
+            {
+                "column_name": "num_data_pts",
+                "data_type": "integer",
+                "is_indexed": false,
+                "description": "The number of data points used to calculate the gram weight."
+            },
+            {
+                "column_name": "std_dev",
+                "data_type": "double precision",
+                "is_indexed": false,
+                "description": "The standard deviation of the gram weight, indicating variability."
+            }
+        ],
+        "primary_keys": [
+            "ndb_no",
+            "seq"
+        ],
+        "foreign_keys": [
+            {
+                "column": "ndb_no",
+                "references_table": "food_des",
+                "references_column": "ndb_no"
+            }
+        ],
+        "sample_rows": [
+            {
+                "ndb_no": "01001",
+                "seq": "1 ",
+                "amount": 1.0,
+                "msre_desc": "cup",
+                "gm_wgt": 227.0,
+                "num_data_pts": null,
+                "std_dev": null
+            },
+            {
+                "ndb_no": "01001",
+                "seq": "2 ",
+                "amount": 1.0,
+                "msre_desc": "tbsp",
+                "gm_wgt": 14.2,
+                "num_data_pts": null,
+                "std_dev": null
+            }
+        ],
+        "table_description": "This table provides conversion factors between common household measures (e.g., cups, tablespoons) and gram weights for specific food items."
     }
 }
