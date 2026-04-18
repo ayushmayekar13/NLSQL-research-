@@ -217,8 +217,10 @@
           <div class="fade-in-3">
             <div class="sec-label-sm">Generated SQL</div>
             <div class="sql-wrap">
-              <button class="copy-btn" style="right: 70px;" onclick="executeSQL()">Execute</button>
-              <button class="copy-btn" onclick="copySQL()">copy</button>
+              <div class="sql-actions">
+                <button class="copy-btn" onclick="executeSQL()">Execute</button>
+                <button class="copy-btn" onclick="copySQL()">copy</button>
+              </div>
               <div class="sql-box">
                 <pre id="sql-display"><span class="kw">SELECT</span>
   <span class="kw">SUM</span>(p.amount) <span class="kw">AS</span> total_revenue
