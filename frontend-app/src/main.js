@@ -386,6 +386,7 @@ window.runQuery = async function() {
     const baseNote = (type === 'MRD' ? 'Multi-round · combined with previous turns' : 'Standalone · no prior context needed');
     
     newEntry.type = type;
+    newEntry.resolved_query = out.resolved_query || q;
     newEntry.note = warnings.length ? (baseNote + ' · ' + warnings[0]) : baseNote;
     
     const schema = out.schema || {};
@@ -444,7 +445,7 @@ window.executeSQL = async function() {
     username: document.getElementById('inp-user').value,
     password: document.getElementById('inp-pass').value,
     sql: d.raw_sql,
-    nl_query: d.query
+    nl_query: d.resolved_query || d.query
   };
 
   document.querySelector('.res-table thead tr').innerHTML = '<th>status</th>';
