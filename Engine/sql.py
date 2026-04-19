@@ -195,7 +195,7 @@ class SchemaRetriever:
         self.qdrant_port = qdrant_port
         self.base_url = f"http://{qdrant_host}:{qdrant_port}"
 
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, trust_remote_code=True)
 
     def search_schema(self, query_text: str, top_k: int = 5, collection_name: Optional[str] = None):
         collection = collection_name or self.collection_name

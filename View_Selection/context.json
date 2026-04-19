@@ -5,55 +5,55 @@
                 "column_name": "datasrc_id",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "A unique identifier for the data source."
+                "description": "Unique identifier for the data source."
             },
             {
                 "column_name": "authors",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The author(s) of the publication or article."
+                "description": "The authors associated with the data source."
             },
             {
                 "column_name": "title",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The title of the publication or research article."
+                "description": "The title of the publication or data source."
             },
             {
                 "column_name": "year",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "The year in which the data source was published."
+                "description": "The year of publication for the data source."
             },
             {
                 "column_name": "journal",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The name of the journal or publication where the data source was published."
+                "description": "The name of the journal where the data source was published."
             },
             {
                 "column_name": "vol_city",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The volume number of the journal or the city of publication."
+                "description": "The volume number of the publication."
             },
             {
                 "column_name": "issue_state",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The issue number of the journal or the state of publication."
+                "description": "The issue number of the publication."
             },
             {
                 "column_name": "start_page",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The starting page number of the article within the publication."
+                "description": "The starting page number of the publication."
             },
             {
                 "column_name": "end_page",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The ending page number of the article within the publication."
+                "description": "The ending page number of the publication."
             }
         ],
         "primary_keys": [
@@ -84,7 +84,7 @@
                 "end_page": "638"
             }
         ],
-        "table_description": "This table stores metadata and citation details for various data sources, typically research publications or articles."
+        "table_description": "This table stores metadata for various data sources, primarily publications, including details like authors, title, publication year, and journal information."
     },
     "datsrcln": {
         "columns": [
@@ -92,19 +92,19 @@
                 "column_name": "ndb_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "The unique identifier for a food item from the National Nutrient Database."
+                "description": "The NDB number, identifying a specific food item."
             },
             {
                 "column_name": "nutr_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "The unique identifier for a specific nutrient."
+                "description": "The nutrient number, identifying a specific nutrient."
             },
             {
                 "column_name": "datasrc_id",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "The unique identifier for the data source that provided the information."
+                "description": "The identifier for the data source from which the nutrient information was obtained."
             }
         ],
         "primary_keys": [
@@ -151,7 +151,7 @@
                 "datasrc_id": "S27   "
             }
         ],
-        "table_description": "This table identifies the data sources for each food-nutrient combination."
+        "table_description": "This table links specific nutrient data for a food item to its corresponding data source."
     },
     "deriv_cd": {
         "columns": [
@@ -159,13 +159,13 @@
                 "column_name": "deriv_cd",
                 "data_type": "text",
                 "is_indexed": true,
-                "description": "A unique code representing the method of data derivation or its documentation status."
+                "description": "The unique code identifying the derivation status or type of analytical data."
             },
             {
                 "column_name": "derivcd_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "A descriptive explanation of the data derivation code."
+                "description": "A detailed description of the derivation code."
             }
         ],
         "primary_keys": [
@@ -182,7 +182,7 @@
                 "derivcd_desc": "Analytical data; from the literature or  government;  incomplete documentation"
             }
         ],
-        "table_description": "This table defines codes for data derivation or documentation status, along with their corresponding descriptions."
+        "table_description": "This table stores codes and their corresponding descriptions indicating the derivation status or type of analytical data."
     },
     "fd_group": {
         "columns": [
@@ -190,13 +190,13 @@
                 "column_name": "fdgrp_cd",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "This column stores a unique code identifying each food group."
+                "description": "The unique code identifying a specific food group."
             },
             {
                 "column_name": "fddrp_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "This column provides a textual description of the food group."
+                "description": "A descriptive name for the food group."
             }
         ],
         "primary_keys": [
@@ -213,7 +213,7 @@
                 "fddrp_desc": "Spices and Herbs"
             }
         ],
-        "table_description": "This table categorizes food items into distinct groups."
+        "table_description": "Stores information about different food groups, including their unique codes and descriptive names."
     },
     "food_des": {
         "columns": [
@@ -221,85 +221,85 @@
                 "column_name": "ndb_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for each food item, typically from a national nutrient database."
+                "description": "A unique identifier assigned to each food item."
             },
             {
                 "column_name": "fdgrp_cd",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Code identifying the food group to which the food item belongs."
+                "description": "The code linking the food item to its respective food group."
             },
             {
                 "column_name": "long_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The complete descriptive name of the food item."
+                "description": "A comprehensive description of the food item."
             },
             {
                 "column_name": "shrt_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "An abbreviated descriptive name for the food item."
+                "description": "A concise, abbreviated description of the food item."
             },
             {
                 "column_name": "comname",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The common or household name for the food item."
+                "description": "The common or colloquial name for the food item."
             },
             {
                 "column_name": "manufacname",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The name of the manufacturer or brand for commercial food products."
+                "description": "The name of the manufacturer or brand for the food item."
             },
             {
                 "column_name": "survey",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "Indicates if the food item was part of a specific dietary survey."
+                "description": "An indicator (e.g., 'Y' or 'N') if the food item was included in a specific survey."
             },
             {
                 "column_name": "ref_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "Description of the refuse (inedible portion) associated with the food item."
+                "description": "A description of any inedible refuse associated with the food item."
             },
             {
                 "column_name": "refuse",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "The percentage of refuse or inedible material for the food item."
+                "description": "The percentage of inedible refuse for the food item."
             },
             {
                 "column_name": "sciname",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The scientific name of the food item, especially for plant or animal sources."
+                "description": "The scientific name (e.g., botanical or zoological) of the food item."
             },
             {
                 "column_name": "n_factor",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The nitrogen factor used for calculating protein content."
+                "description": "The nitrogen factor used to calculate protein content."
             },
             {
                 "column_name": "pro_factor",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The protein factor used in energy calculations."
+                "description": "The general factor used to convert nitrogen to protein."
             },
             {
                 "column_name": "fat_factor",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The fat factor used in energy calculations."
+                "description": "The general factor used to calculate calories from fat."
             },
             {
                 "column_name": "cho_factor",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The carbohydrate factor used in energy calculations."
+                "description": "The general factor used to calculate calories from carbohydrates."
             }
         ],
         "primary_keys": [
@@ -346,7 +346,7 @@
                 "cho_factor": 3.87
             }
         ],
-        "table_description": "This table provides comprehensive descriptive information for various food items, including their names, origins, and factors used in nutritional calculations."
+        "table_description": "This table provides detailed descriptive information and nutrient conversion factors for individual food items, identified by their unique NDB number."
     },
     "footnote": {
         "columns": [
@@ -354,31 +354,31 @@
                 "column_name": "ndb_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for the food item to which the footnote applies, referencing the food_des table."
+                "description": "The unique identifier for the food item to which the footnote applies."
             },
             {
                 "column_name": "footnt_no",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "The specific footnote number associated with the food item."
+                "description": "The sequential number identifying the specific footnote for a food or nutrient."
             },
             {
                 "column_name": "footnt_typ",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "The type of footnote, categorizing its content or purpose."
+                "description": "The type of footnote, indicating its nature (e.g., general, nutrient-specific)."
             },
             {
                 "column_name": "nutr_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for the nutrient to which the footnote applies, if specific to a nutrient, referencing the nutr_def table."
+                "description": "The unique identifier for the nutrient to which the footnote applies, if any."
             },
             {
                 "column_name": "footnt_txt",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The complete textual content of the footnote."
+                "description": "The full text content of the footnote."
             }
         ],
         "primary_keys": [],
@@ -403,7 +403,7 @@
                 "footnt_txt": "Contains 5% acetic acid.  Total proximates do not equal 100%."
             }
         ],
-        "table_description": "This table stores explanatory footnotes providing additional details or context for specific food items or nutrients within the database."
+        "table_description": "This table stores additional explanatory notes or special conditions (footnotes) related to specific food items or nutrients."
     },
     "nut_data": {
         "columns": [
@@ -411,103 +411,103 @@
                 "column_name": "ndb_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for the food item, linking to the food description table."
+                "description": "National Nutrient Database (NDB) number, uniquely identifying a food item."
             },
             {
                 "column_name": "nutr_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for the nutrient, linking to the nutrient definition table."
+                "description": "Nutrient number, uniquely identifying a specific nutrient."
             },
             {
                 "column_name": "nutr_val",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The measured or calculated value of the nutrient in the food item."
+                "description": "The nutrient value (e.g., amount per 100g) for the specified food and nutrient."
             },
             {
                 "column_name": "num_data_pts",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The number of data points used to calculate the nutrient value."
+                "description": "Number of data points used to determine the nutrient value."
             },
             {
                 "column_name": "std_error",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The standard error of the mean for the nutrient value."
+                "description": "Standard error of the mean nutrient value."
             },
             {
                 "column_name": "src_cd",
                 "data_type": "integer",
                 "is_indexed": true,
-                "description": "Code indicating the source of the data for the nutrient value."
+                "description": "Source code indicating the type of data or origin of the nutrient value."
             },
             {
                 "column_name": "deriv_cd",
                 "data_type": "text",
                 "is_indexed": true,
-                "description": "Code indicating the method used to derive the nutrient value."
+                "description": "Derivation code indicating how the nutrient value was obtained or derived."
             },
             {
                 "column_name": "ref_ndb_no",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "Reference NDB number for cases where the nutrient value is derived from another food item."
+                "description": "Reference NDB number for cases where the nutrient value is based on another food item."
             },
             {
                 "column_name": "add_nutr_mark",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "Additional mark or flag related to the nutrient data."
+                "description": "Additional nutrient mark, providing further context about the nutrient data."
             },
             {
                 "column_name": "num_studies",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "The number of studies used to determine the nutrient value."
+                "description": "Number of studies used to determine the nutrient value, if applicable."
             },
             {
                 "column_name": "min",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The minimum observed value for the nutrient."
+                "description": "Minimum value observed for the nutrient."
             },
             {
                 "column_name": "max",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The maximum observed value for the nutrient."
+                "description": "Maximum value observed for the nutrient."
             },
             {
                 "column_name": "df",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "Degrees of freedom for statistical analysis of the nutrient value."
+                "description": "Degrees of freedom associated with the nutrient data."
             },
             {
                 "column_name": "low_eb",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The lower error bound of the nutrient value."
+                "description": "Lower bound of the 95% confidence interval for the nutrient value."
             },
             {
                 "column_name": "up_eb",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The upper error bound of the nutrient value."
+                "description": "Upper bound of the 95% confidence interval for the nutrient value."
             },
             {
                 "column_name": "stat_cmt",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "Comments related to the statistical derivation or quality of the nutrient data."
+                "description": "Statistical comment related to the nutrient value data."
             },
             {
                 "column_name": "cc",
                 "data_type": "character",
                 "is_indexed": false,
-                "description": "Confidence code indicating the reliability of the nutrient value."
+                "description": "Confidence code for the nutrient value."
             }
         ],
         "primary_keys": [
@@ -576,7 +576,7 @@
                 "cc": null
             }
         ],
-        "table_description": "This table stores detailed nutritional values and related statistical data for specific food items, linking them to food and nutrient definitions."
+        "table_description": "Stores detailed nutrient values for specific food items, linking food identifiers to nutrient identifiers and their corresponding measurement data."
     },
     "nutr_def": {
         "columns": [
@@ -584,7 +584,7 @@
                 "column_name": "nutr_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "A unique identifier for each nutrient."
+                "description": "Unique identifier for the nutrient."
             },
             {
                 "column_name": "units",
@@ -596,25 +596,25 @@
                 "column_name": "tagname",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "A common short name or tag used to identify the nutrient."
+                "description": "A short, internal tag or abbreviation for the nutrient."
             },
             {
                 "column_name": "nutrdesc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "The full descriptive name of the nutrient."
+                "description": "A full, descriptive name of the nutrient."
             },
             {
                 "column_name": "num_dec",
                 "data_type": "smallint",
                 "is_indexed": false,
-                "description": "The recommended number of decimal places for displaying the nutrient's value."
+                "description": "The suggested number of decimal places for displaying the nutrient's value."
             },
             {
                 "column_name": "sr_order",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "An integer indicating the display or sort order for the nutrient."
+                "description": "The display order or sequence for the nutrient."
             }
         ],
         "primary_keys": [
@@ -639,22 +639,21 @@
                 "sr_order": 800
             }
         ],
-        "table_description": "This table defines various nutrients, including their unique identifiers, units, common tags, and full descriptions."
+        "table_description": "This table defines and describes various nutrients, including their identifiers, units of measure, short tags, full descriptions, and display properties."
     },
     "src_cd": {
-        "table_description": "This table defines and describes various source codes used to categorize the origin or derivation of data.",
         "columns": [
             {
                 "column_name": "src_cd",
                 "data_type": "integer",
                 "is_indexed": true,
-                "description": "The unique identifier for a data source code."
+                "description": "A unique identifier for the source code."
             },
             {
                 "column_name": "srccd_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "A textual description explaining the meaning of the source code."
+                "description": "A detailed description of the source code."
             }
         ],
         "primary_keys": [
@@ -670,7 +669,8 @@
                 "src_cd": 4,
                 "srccd_desc": "Imputed"
             }
-        ]
+        ],
+        "table_description": "This table defines various source codes and their corresponding descriptions, indicating the origin or method of data derivation."
     },
     "weight": {
         "columns": [
@@ -678,43 +678,43 @@
                 "column_name": "ndb_no",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Unique identifier for the food item, linking to the food description table."
+                "description": "National Nutrient Database number for a food item, linking to the food_des table."
             },
             {
                 "column_name": "seq",
                 "data_type": "character",
                 "is_indexed": true,
-                "description": "Sequence number for different household measures of the same food item."
+                "description": "Sequence number to uniquely identify a specific weight or measure entry for a food item in conjunction with ndb_no."
             },
             {
                 "column_name": "amount",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The quantity of the household measure (e.g., 1 for 1 cup)."
+                "description": "The numerical amount for the given measure description (e.g., 1.0 for '1 cup')."
             },
             {
                 "column_name": "msre_desc",
                 "data_type": "text",
                 "is_indexed": false,
-                "description": "Textual description of the household measure (e.g., 'cup', 'tablespoon')."
+                "description": "A textual description of the common household measure (e.g., 'cup', 'tbsp')."
             },
             {
                 "column_name": "gm_wgt",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The gram weight equivalent of the specified amount and measure."
+                "description": "The equivalent weight in grams for the specified amount and measure."
             },
             {
                 "column_name": "num_data_pts",
                 "data_type": "integer",
                 "is_indexed": false,
-                "description": "The number of data points used to calculate the gram weight."
+                "description": "The number of data points used to derive the gram weight, if available."
             },
             {
                 "column_name": "std_dev",
                 "data_type": "double precision",
                 "is_indexed": false,
-                "description": "The standard deviation of the gram weight, indicating variability."
+                "description": "The standard deviation of the gram weight, indicating variability, if available."
             }
         ],
         "primary_keys": [
@@ -748,6 +748,6 @@
                 "std_dev": null
             }
         ],
-        "table_description": "This table provides conversion factors between common household measures (e.g., cups, tablespoons) and gram weights for specific food items."
+        "table_description": "Stores the weights and common household measures for various food items, linking to specific food entries."
     }
 }

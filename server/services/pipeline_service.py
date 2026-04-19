@@ -204,7 +204,7 @@ def generate_context(schema: dict, database: str, on_table_done=None) -> dict:
                     contents=f"""Act as a database documentation assistant. I will provide a table name (`key`) and its JSON metadata (`value`) which includes columns, primary_keys, foreign_keys, and sample_rows.
 
         Your tasks:
-        1. Generate a concise, one-sentence description of the table's purpose. Add this as a new key called "table_description" at the root level of the JSON object.
+        1. Generate a concise, one-sentence description of the table's purpose, inside it MAKE SURE TO mention all of the column names at the end. Add this as a new key called "table_description" at the root level of the JSON object.
         2. Generate a brief description for each column. Add this as a new key called "description" inside each respective column's object within the "columns" section.
         3. Retain all original data (sample rows, keys, etc.).
 
@@ -298,16 +298,19 @@ def upsert_to_qdrant(
     table_col_name = f"{database}-table"
     column_col_name = f"{database}-table-column"
 
+    # Load embedding model (read from env so it stays in sync with SchemaRetriever)
+    embedding_model_name = os.getenv("EMBEDDING_MODEL_NAME", "all-MiniLM-L6-v2")
+    model = SentenceTransformer(embedding_model_name, trust_remote_code=True)
+    vector_size = model.get_sentence_embedding_dimension()
+    print(f"[upsert] Using embedding model '{embedding_model_name}' — vector size: {vector_size}")
+
     # Delete old collections if they exist (for demo replayability)
     _delete_collection(base_url, table_col_name)
     _delete_collection(base_url, column_col_name)
 
-    # Create fresh collections
-    _create_collection(base_url, table_col_name)
-    _create_collection(base_url, column_col_name)
-
-    # Load embedding model
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+    # Create fresh collections with dynamic vector size
+    _create_collection(base_url, table_col_name, vector_size=vector_size)
+    _create_collection(base_url, column_col_name, vector_size=vector_size)
 
     points_table = []
     points_column = []
