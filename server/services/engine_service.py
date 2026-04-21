@@ -23,8 +23,8 @@ def _get_nl2sql(model_name: str):
     return NL2SQL(model_name=model_name)
 
 @lru_cache(maxsize=8)
-def _get_retriever(collection_name: str = "table", context_file: str = "View_Selection/context.json"):
-    return SchemaRetriever(collection_name=collection_name, context_file=context_file)
+def _get_retriever(collection_name: str = "table", context_file: str = "View_Selection/context.json", model_name: str = "all-MiniLM-L6-v2"):
+    return SchemaRetriever(collection_name=collection_name, context_file=context_file, model_name=model_name)
 
 def _extract_matched_tables(schema: dict[str, Any] | None) -> list[str]:
     if not schema:
@@ -81,6 +81,10 @@ def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = N
             
             if is_mrd:
                 resolved_query = combine_mrd_query(query, confidence)
+                # If combiner returned query unchanged (low confidence / no history),
+                # downgrade to SRD so frontend displays correctly.
+                if resolved_query == query:
+                    query_type = "SRD"
             
             add_to_history(query, resolved_query)
     except Exception as e:
@@ -89,7 +93,7 @@ def run_readonly_pipeline(query: str, top_k: int = 5, session_id: str | None = N
     # 2. Schema Retrieval (via Engine)
     schema: dict[str, Any] | None = None
     try:
-        retriever = _get_retriever(collection, context_file)
+        retriever = _get_retriever(collection, context_file, settings.embedding_model_name)
         schema = retriever.retrieve(resolved_query, top_k=top_k)
         if not schema:
             warnings.append("No matching schema context found for query.")
@@ -153,7 +157,7 @@ def fix_sql_with_gemini(database_name: str, nl_query: str, failed_sql: str, erro
     context_file = f"View_Selection/{database_name}_context.json"
     
     try:
-        retriever = _get_retriever(collection, context_file)
+        retriever = _get_retriever(collection, context_file, settings.embedding_model_name)
         schema = retriever.retrieve(nl_query, top_k=5)
     except Exception:
         return None
